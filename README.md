@@ -17,3 +17,16 @@ Build additions on the R-side via the [eddy4R installation script](https://www.d
 - eddy4R.qaqc
 
 For additional information please see Sect. 2.6	"Installation and operation" in [eddy4R: A community-extensible processing, analysis and modeling framework for eddy-covariance data based on R, Git, Docker and HDF5](http://www.geosci-model-dev-discuss.net/gmd-2016-318/).
+
+## Docker Image
+
+To build the eddy4R Docker image locally, make sure you have [Docker installed](https://docs.docker.com/get-docker/) on your system. Then, from the root directory of this repository, run:
+```
+docker build -t eddy4r:latest .
+```
+
+After building the image, you can run a container using:
+
+```
+docker run -e PASSWORD=<YOUR_PASS> -p 8787:8787 eddy4r:latest
+```
