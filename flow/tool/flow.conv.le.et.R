@@ -44,29 +44,29 @@ enddate <- "2021-09-01"
 
 #set input and output directories 
 
-DirIn <- #"C:/Users/cflorian/Desktop/LE-to-ET"
-
-DirOut <- #"C:/Users/cflorian/Desktop/LE-to-ET"
-
-#download data from the NEON data portal
-
-neonUtilities::zipsByProduct(dpID = "DP4.00200.001", site = site, startdate = startdate, enddate = enddate, package = "basic", check.size = F, savepath = DirOut)
+DirIn <- "/home/rstudio/LE-to-ET"
+  
+  DirOut <- "/home/rstudio/LE-to-ET"
+  
+  #download data from the NEON data portal
+  
+  neonUtilities::zipsByProduct(dpID = "DP4.00200.001", site = site, startdate = startdate, enddate = enddate, package = "basic", check.size = F, savepath = DirOut)
 
 #extract LE data from bundled HDF5 files
 
 dp04Data <- neonUtilities::stackEddy(filepath = paste0(DirIn, "/filesToStack00200"), level = "dp04", var = "fluxH2o", avg = 30)
 
-LE <- dp4Data[[site]]$data.fluxH2o.turb.flux
+LE <- dp04Data[[site]]$data.fluxH2o.turb.flux
 
 #extract air temp data from bundled HDF5 files
 
-dp01Data <- neonUtilities::stackEddy(filepath = paste0(DirIn, "/filesToStack00200"), level = "dp01", var = c("soni"), avg = 30)
+dp01Data <- neonUtilities::stackEddy(filepath = paste0(DirIn, "/filesToStack00200"), level = "dp04", var = c("soni"), avg = 30)
 
-tempAir <- dp1Data[[site]]$data.soni.tempAir.mean
+tempAir <- dp01Data[[site]]$data.soni.tempAir.mean
 
 #extract time and convert from character to time format
 
-timeBgn <- as.POSIXct(dp4Data[[site]]$timeBgn, format="%Y-%m-%dT%H:%M:%S", tz="GMT")
+timeBgn <- as.POSIXct(dp04Data[[site]]$timeBgn, format="%Y-%m-%dT%H:%M:%S", tz="GMT")
 
 #compile working dataframe
 
@@ -74,7 +74,7 @@ data <- data.frame(cbind(timeBgn, LE, tempAir))
 
 #remove flagged data
 
-data <- data[which(dp1Data[[site]]$qfqm.soni.tempAir.qfFinl == 0 & dp4Data[[site]]$qfqm.fluxH2o.turb.qfFinl == 0),]
+data <- data[which(dp01Data[[site]]$qfqm.soni.tempAir.qfFinl == 0 & dp04Data[[site]]$qfqm.fluxH2o.turb.qfFinl == 0),]
 
 #calculate latent heat of vaporization 
 
@@ -89,6 +89,5 @@ data$LE_kin <- data$LE/(data$Lv * eddy4R.base::IntlNatu$MolmH2o)
 # based on molar volume of 1.802e-5 m3 mol-1 (http://www.science.uwaterloo.ca/~cchieh/cact/applychem/waterphys.html)
 # times 1e3 conversion from m to mm
 # times 86400 conversion from s to d
-  
+
 data$ET <- data$LE_kin * 1.802e-5 * 1e3 * 86400
-  
